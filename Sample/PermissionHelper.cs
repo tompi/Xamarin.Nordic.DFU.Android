@@ -1,11 +1,10 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Android;
 using Android.App;
 using Android.Bluetooth;
 using Android.Content;
-using Android.Content.PM;
-using Android.Support.V4.App;
-using Android.Support.V4.Content;
+using Android.OS;
+using Xamarin.Essentials;
 
 namespace Sample
 {
@@ -15,8 +14,24 @@ namespace Sample
         public static int ENABLE_BLUETOOTH_REQUEST = 201;
         public static int LOCATION_REQUEST_CODE = 101;
 
-        public static async Task<bool> CheckBluetoothEnabled(Activity activity)
+        public static async Task<bool> CheckBluetoothPermissions(Activity activity)
         {
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.R)
+            {
+                // The device is running Android 12 or higher
+                var status = await Permissions.RequestAsync<BLEPermission>();
+                if (status != PermissionStatus.Granted)
+                {
+                    return false;
+                }
+            }
+            // For older Android versions we need location services
+            var access = await CheckAndAskPermission<Permissions.LocationWhenInUse>();
+            if (!access)
+            {
+                return false;
+            }
+
             var bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
             if(bluetoothAdapter == null)
             {
@@ -52,21 +67,32 @@ namespace Sample
         }
 
 
-        public static async Task<bool> CheckLocationPermissionAsync()
+        private static async Task<bool> CheckAndAskPermission<T>()
+            where T : Permissions.BasePermission, new()
         {
-            if (ContextCompat.CheckSelfPermission(MainActivity.Instance, Manifest.Permission.AccessFineLocation) == (int)Permission.Granted)
+            var status = await Permissions.CheckStatusAsync<T>();
+
+            // If we have access we are finished
+            if (status == PermissionStatus.Granted)
             {
                 return true;
             }
-            else
-            {
-                ActivityCompat.RequestPermissions(MainActivity.Instance, new string[] { Manifest.Permission.AccessFineLocation }, LOCATION_REQUEST_CODE);
-            }
 
-            MainActivity.Instance.PermissionPromise = new TaskCompletionSource<bool>();
-
-            return await MainActivity.Instance.PermissionPromise.Task;
+            status = await Permissions.RequestAsync<T>();
+            var hasPermission = status == PermissionStatus.Granted;
+            return hasPermission;
         }
+    }
 
-   }
+    /// <summary>
+    /// Copied from(with some constants mods...); https://stackoverflow.com/questions/71028853/xamarin-forms-ble-plugin-scan-issue-android-12.
+    /// </summary>
+    public class BLEPermission : Permissions.BasePlatformPermission
+    {
+        public override (string androidPermission, bool isRuntime)[] RequiredPermissions => new List<(string androidPermission, bool isRuntime)>
+        {
+            ("android.permission.BLUETOOTH_SCAN", true),
+            ("android.permission.BLUETOOTH_CONNECT", true),
+        }.ToArray();
+    }
 }

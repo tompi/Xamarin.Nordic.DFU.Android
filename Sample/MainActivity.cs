@@ -13,7 +13,6 @@ namespace Sample
     public class MainActivity : AppCompatActivity
     {
         public static MainActivity Instance { get; private set; }
-        public TaskCompletionSource<bool> PermissionPromise { get; set; }
         public TaskCompletionSource<bool> BluetoothEnablePromise { get; set; }
         
         private static int FILE_SELECT_CODE = 301;

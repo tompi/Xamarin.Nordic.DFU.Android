@@ -3,7 +3,6 @@ using Android.App;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
-using AndroidX.Core.Content;
 using Sample.Nordic;
 
 namespace Sample
@@ -88,7 +87,7 @@ namespace Sample
         {
             _pauseButton.Enabled = false;
             _continueButton.Enabled = true;
-            _updater.Pause();            
+            _updater.Pause();
         }
 
         // BLE callbacks typically come back on other threads than the UI thread,

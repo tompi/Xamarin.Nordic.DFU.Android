@@ -1,15 +1,16 @@
 using Android.Bluetooth;
-using Plugin.BluetoothLE;
 
 namespace Sample
 {
+    using Plugin.BLE.Abstractions.Contracts;
+
     public class BLEDevice
     {
         public BLEDevice(IDevice device, int rssi)
         {
             Name = device.Name;
             // Since the BLE plugin is cross platform we need tyo use native device to find address
-            
+
             var nativeDevice = (BluetoothDevice)device.NativeDevice;
             Address = nativeDevice.Address;
             Rssi = rssi;

@@ -1,16 +1,16 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
 using Android.Util;
 using Android.Widget;
-using Plugin.BluetoothLE;
 
 namespace Sample
 {
+    using Plugin.BLE;
+    using Plugin.BLE.Abstractions.EventArgs;
+
     [Activity(Label = "Select Device")]
     public class BLEDevicesActivity : ListActivity
     {
@@ -43,36 +43,27 @@ namespace Sample
             _adapter.NotifyDataSetChanged();
             _seenDevices.Clear();
 
-            var bleReady = await CheckPermissionAndAskIfNeeded();
+            var bleReady = await PermissionHelper.CheckBluetoothPermissions(this);
             if (bleReady)
             {
-                CrossBleAdapter.Current.Scan().Subscribe(FoundDevice);
+                CrossBluetoothLE.Current.Adapter.DeviceDiscovered += FoundDevice;
+                await CrossBluetoothLE.Current.Adapter.StartScanningForDevicesAsync();
             }
         }
 
         protected override void OnPause()
         {
             base.OnPause();
-            CrossBleAdapter.Current.StopScan();
+            CrossBluetoothLE.Current.Adapter.StopScanningForDevicesAsync();
         }
 
-        private async Task<bool> CheckPermissionAndAskIfNeeded()
+        private void FoundDevice(object sender, DeviceEventArgs deviceEventArgs)
         {
-            var status = await PermissionHelper.CheckBluetoothEnabled(this);
-            if (status)
-            {
-                return await PermissionHelper.CheckLocationPermissionAsync();
-            }
-            return false;
-        }
-
-        private void FoundDevice(IScanResult scanResult)
-        {
-            var device = scanResult.Device;
-            Log.Info(GetType().Name, $"Found device {device.Name}, Address: {device.Uuid}");
-            if (_seenDevices.Contains(device.Uuid)) return;
-            _seenDevices.Add(device.Uuid);
-            _adapter.Add(new BLEDevice(device, scanResult.Rssi));
+            var device = deviceEventArgs.Device;
+            Log.Info(GetType().Name, $"Found device {device.Name}, Address: {device.Id}");
+            if (_seenDevices.Contains(device.Id)) return;
+            _seenDevices.Add(device.Id);
+            _adapter.Add(new BLEDevice(device, device.Rssi));
             _adapter.NotifyDataSetChanged();
         }
     }
