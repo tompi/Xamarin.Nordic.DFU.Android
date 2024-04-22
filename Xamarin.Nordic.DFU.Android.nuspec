@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xamarin.Nordic.DFU.Android</id>
-    <version>2.3.1.4</version>
+    <version>2.4.2.3</version>
     <title>Nordic OTA DFU for Xamarin.Android</title>
     <authors>Laerdal Medical</authors>
     <owners>Laerdal Medical</owners>
@@ -16,9 +16,7 @@ This nuget is just a binding library for this native Android library: https://gi
     </description>
 
     <releaseNotes>
-        Update to version 2.3.1 from the Nordic library.
-
-        Also update Android target to 13.
+        Update to version 2.4.2 from the Nordic library.
     </releaseNotes>
 
     <copyright>Copyright Laerdal Medical 2023</copyright>
@@ -32,6 +30,7 @@ This nuget is just a binding library for this native Android library: https://gi
         <dependency id="Xamarin.AndroidX.Annotation" version="1.7.0.2" />
         <dependency id="Xamarin.AndroidX.Core" version="1.12.0.2" />
         <dependency id="Xamarin.AndroidX.LocalBroadcastManager" version="1.1.0.9" />
+        <dependency id="GoogleGson" version="2.10.1.8" />
     </group>
     </dependencies>
 
